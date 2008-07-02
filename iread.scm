@@ -1,4 +1,14 @@
+(define (flatten l)
+  (if (not (list? l))
+    (list l)
+    (if (null? l)
+      '()
+      (append (flatten (car l))
+              (flatten (cdr l))))))
+
 (define (iread s)
+  (define lparen #\()
+  (define rparen #\))
   (define peek '())
   (define input '())
   (define indent 0)
@@ -18,23 +28,57 @@
     (define (read-token)
       (define (loop)
         (if (or (null? peek)
-                (char-whitespace? peek))
+                (char-whitespace? peek)
+                (equal? #\; peek)
+                (equal? lparen peek))
           '()
           (cons (get)
                 (loop))))
-      (let ((i indent)
-            (token (loop)))
-        (cons (list->string token)
-              i)))
-    (define (read-whitespace)
-      (if (or (null? peek)
-              (not (char-whitespace? peek)))
-        '()
+      (list->string (loop)))
+    (define (read-comment)
+      (if (equal? peek #\newline)
+        (read-whitespace)
         (begin (get)
-               (read-whitespace))))
+               (read-comment))))
+    (define (read-whitespace)
+      (if (equal? peek #\;) ; ; IS preceded by whitespace
+        (read-comment)
+        (if (and (not (null? peek))
+                 (char-whitespace? peek))
+            (begin (get)
+                   (read-whitespace)))))
+    (define (read-string)
+      (define (loop)
+        (if (null? peek)
+          '()
+          (if (equal? peek #\")
+            (cons (get)
+                  '())
+            (cons (get)
+                  (loop)))))
+      (list->string (cons (get) ;becouse of the first #\"
+                          (loop))))
+    (define (read-sexpr)
+      (define (loop n-open-parens)
+        (cond ((null? peek) '())
+              ((equal? peek lparen) (cons (get)
+                                          (loop (+ n-open-parens 1))))
+              ((equal? peek rparen) (if (= 1 n-open-parens)
+                                      (cons (get) ;exit loop
+                                            '())
+                                      (cons (get)
+                                            (loop (- n-open-parens 1)))))
+              (else (cons (get)
+                          (loop n-open-parens)))))
+      (list->string (loop 0)))
 
     (read-whitespace)
-    (read-token))
+    (cons indent
+          (if (equal? peek lparen)
+            (read-sexpr)
+            (if (equal? peek #\")
+              (read-string)
+              (read-token)))))
   (define peekt '())
   (define (gett)
     (write peekt) (newline)
@@ -46,15 +90,15 @@
  
   (define (tokens->list i)
     (define (head i)
-      (let ((first (car (gett))))
+      (let ((first (cdr (gett))))
         (if (equal? "group" first)
-          (body (cdr peekt))
-          (if (< i (cdr peekt)) ;we have childs
+          (body (car peekt))
+          (if (< i (car peekt)) ;we have childs
             (append (list first)
-                    (body (cdr peekt)))
+                    (body (car peekt)))
             first))))
     (define (body i)
-      (if (= i (cdr peekt))
+      (if (= i (car peekt))
         (cons (head i)
               (body i))
         '()))
@@ -62,10 +106,20 @@
     (write (list 'a i))
     (head i))
 
+  (define (to-string l)
+    (define (loop l)
+      (if (list? l)
+        (append (list "(")
+                (map loop l)
+                (list ") "))
+        (list l " ")))
+    (apply string-append (flatten (loop l))))
+
   (set! input (string->list s))
   (set! peek (car input))
   (gett)
-  (tokens->list 0))
+  (call-with-input-string (to-string (tokens->list 0))
+                          read))
 
 
 ;(define input "define fac x\n       if = x\n            0\n          1\n          * x\n            fac - x\n                  1")
@@ -81,11 +135,12 @@ define fac x
 (define input2 "
 z a
   b c
-  (d)
+  (+ 1 d)
   group e f
-        g
-        (h)
+        g ;test
+        group h
   i
+  \"hello\"
   quote j
 ")
 
@@ -98,3 +153,4 @@ z a
 
 (display input2) (newline)
 (write (iread input2)) (newline)
+

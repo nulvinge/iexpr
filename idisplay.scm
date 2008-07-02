@@ -1,36 +1,22 @@
-(define (make-loop combiner item the-list)
-  (define (loop l)
+(define (flatten l)
+  (if (not (list? l))
+    (list l)
     (if (null? l)
       '()
-      (combiner (item (car l))
-                (loop (cdr l)))))
-  (loop the-list))
-
-(define (flatten l)
-  (if (list? l)
-    (make-loop append
-               flatten
-               l)
-    (list l)))
+      (append (flatten (car l))
+              (flatten (cdr l))))))
 
 (define (idisplay l)
-  (define tab #\space)
   (define group "group ")
 
   (define (indent i)
-    (make-string i tab))
+    (make-string i #\space))
 
   (define (len l)
     (if (null? l)
       0
       (+ (string-length (car l))
          (len (cdr l)))))
-  (define (contains-newline? l)
-    (if (null? l)
-      #f
-      (if (equal? (car l) "\n")
-        #t
-        (contains-newline? (cdr l)))))
 
   (define (make-single l)
     (define (remove-multiple-newlines l)
@@ -51,7 +37,7 @@
       (cond ((list? l)   (parse-list l i))
             ((symbol? l) (list (symbol->string l)))
             ((number? l) (list (number->string l)))
-            ((null? l)   "()")
+            ((null? l)   "'()")
             ((string? l) (list "\"" l "\""))
             ((pair? l) (list "(" (parse (car l)) " . " (parse (cdr l)) ")"))
             (else "undef"))))
@@ -68,7 +54,7 @@
         (let* ((first  (parse (car l) i))
                (len    (len first)))
           (list (if (null? (cdr l))
-                  (list "(" first ")")
+                  (list group first)
                   (list first
                         (indent 1)
                         (parse (cadr l) (+ i len 1))
@@ -81,7 +67,7 @@
 
   (make-single (parse l 0)))
 
-(define fac '(define (fac x)
+(define fac '(define (fac x y)
                (if (= x 0)
                  1
                  (* x
@@ -120,7 +106,7 @@
 ;    I
 
 
-(let ((l (idisplay tst5)))
+(let ((l (idisplay fac )))
   (newline)
   (write l) (newline)(newline)
   (display l) (newline)
