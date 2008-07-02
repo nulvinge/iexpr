@@ -1,0 +1,27 @@
+
+define fac x
+       if = x
+            0
+          1
+          * x
+            fac - x
+                  1
+
+define -- x
+       - x
+         1
+
+define range x
+       if zero? x
+          list x
+          append range -- x
+                 list x
+
+define null
+       group list
+
+write map fac
+          range 10
+group newline
+write fac 4
+group newline

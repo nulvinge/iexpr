@@ -6,22 +6,20 @@
       (append (flatten (car l))
               (flatten (cdr l))))))
 
-(define (iread s)
+(define (iread port)
   (define lparen #\()
   (define rparen #\))
   (define peek '())
-  (define input '())
   (define indent 0)
   (define (get)
     (let ((ret peek))
       (if (equal? ret #\newline)
         (set! indent 0)
         (set! indent (+ 1 indent)))
-      (if (null? (cdr input))
+      (if (eof-object? (peek-char port))
         (set! peek '())
         (begin
-          (set! input (cdr input))
-          (set! peek  (car input))))
+          (set! peek  (read-char port))))
       ret))
 
   (define (tokenise)
@@ -81,11 +79,10 @@
               (read-token)))))
   (define peekt '())
   (define (gett)
-    (write peekt) (newline)
     (let ((ret peekt))
       (set! peekt (tokenise))
-      (if (equal? (car peekt) "")
-        (set! peekt '(() . 0)))
+      (if (equal? (cdr peekt) "")
+        (set! peekt '(-1 . ())))
       ret))
  
   (define (tokens->list i)
@@ -102,9 +99,7 @@
         (cons (head i)
               (body i))
         '()))
-          
-    (write (list 'a i))
-    (head i))
+    (body i))
 
   (define (to-string l)
     (define (loop l)
@@ -115,14 +110,12 @@
         (list l " ")))
     (apply string-append (flatten (loop l))))
 
-  (set! input (string->list s))
-  (set! peek (car input))
+  (set! peek (peek-char port))
   (gett)
   (call-with-input-string (to-string (tokens->list 0))
                           read))
 
 
-;(define input "define fac x\n       if = x\n            0\n          1\n          * x\n            fac - x\n                  1")
 (define input1 "
 define fac x
        if = x
@@ -131,6 +124,7 @@ define fac x
           * x
             fac - x
                   1
+fac 4
 ")
 (define input2 "
 z a
@@ -151,6 +145,15 @@ z a
                  (* x
                     (fac (- x 1))))))
 
-(display input2) (newline)
-(write (iread input2)) (newline)
+(define (iexecute port)
+  (map (lambda(e)
+         ;(write e) (newline)
+         (let ((ret (eval e)))
+           (if (not (equal? ret #!void))
+             (begin
+               (write ret) (newline)))))
+       (iread port)))
 
+(display input1) (newline)
+(iexecute (open-input-string input1))
+(iexecute (open-input-file "test.ism"))
