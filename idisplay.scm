@@ -120,7 +120,7 @@
 ;    I
 
 
-(let ((l (idisplay tst3)))
+(let ((l (idisplay tst5)))
   (newline)
   (write l) (newline)(newline)
   (display l) (newline)
