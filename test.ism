@@ -1,4 +1,3 @@
-
 define fac x
        if = x
             0
@@ -17,11 +16,25 @@ define range x
           append range -- x
                  list x
 
-define null
-       group list
+display "A \"string\"\n"
+display list #f
+             (list #\) )
+             #\(
+             #\newline
+             'symbol
+             #\newline
+
+write `(list ,(+ 1 2) 4)
+group newline
+write ` group list
+              unquote + 1
+                        2
+              4
+group newline
+;write `#(10 5 ,(sqrt 4) ,@(map sqrt '(16 9)) 8)           
 
 write map fac
           range 10
 group newline
-write fac 4
+write fac 5
 group newline
