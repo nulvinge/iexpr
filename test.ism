@@ -6,6 +6,7 @@ define fac x
             fac - x
                   1
 
+
 define -- x
        - x
          1
@@ -31,6 +32,7 @@ write ` group list
                         2
               4
 group newline
+;the following line shouldn't be working yet...
 ;write `#(10 5 ,(sqrt 4) ,@(map sqrt '(16 9)) 8)           
 
 write map fac

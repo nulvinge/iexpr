@@ -10,11 +10,15 @@ lambda x y
 lam x y
     + x
       y
+;arc style
 fn x y
    + x
      y
+;three chars is better
 fun x y
     + x
       y
+;lam seems best
+;def is also good with 3 chars
 
 def a 2
