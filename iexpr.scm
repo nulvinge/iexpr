@@ -117,11 +117,11 @@
           (set! peek  (read-char port))))
       ret))
 
-  ;(define cans cons) ; workaround for gambit-c compiler bug 61
   ;cons with forced evaluation order, becouse of the side-effects of get
   (define-macro (cans car cdr)
-                `(let ((primary ,car))
-                   (cons primary ,cdr)))
+     (let ((car-sym (gensym)))
+       `(let ((,car-sym ,car))
+          (cons ,car-sym ,cdr))))
   (define (tokenise)
     (define (read-token)
       (define (loop)
@@ -218,8 +218,11 @@
   (define (tokens->list)
     (define (head i)
       (let ((first (cdr (gett))))
-        (if (equal? "group" first)
-          (body (car peekt))
+        (if (or (equal? "group" first)
+                (equal? "grp" first))
+          (if (< i (car peekt))
+            (body (car peekt))
+            "()") ;if group is alone
           (if (< i (car peekt)) ;we have childs
             (cans first
                   (body (car peekt)))
@@ -270,17 +273,18 @@
 
 (define (iinteractive)
   (define (read-line)
-    (if (char=? #\newline (peek-char))
-      (list (read-char))
-      (cons (read-char)
-            (read-line))))
+    (if (eof-object? (peek-char))
+      '()
+      (if (char=? #\newline (peek-char))
+        (list (read-char))
+        (cons (read-char)
+              (read-line)))))
   (define (read-block)
     (let ((line (list->string (read-line))))
       (if (string=? line "\n")
         (list line)
         (cons line
               (read-block)))))
-  (display (list (car (command-line)) ": i-expr interactive enviroment\n"))
   (iexecute (open-input-string (apply string-append (read-block))))
   (iinteractive))
 
@@ -292,10 +296,12 @@
   (if (not (null? pars))
     (if (string=? (car pars) "load")
       (if (string=? (cadr pars) "-")
-        (iinteractive)
+        (begin
+          (display (list (car (command-line)) ": i-expr interactive enviroment\n"))
+          (iinteractive))
         (iload (cadr pars)))
-      (begin (display (list "Unrecognized parameter\"" (car pars) "\".\n"))
-             (cdr parse-parameters)))))
+      (begin (display (list "Unrecognized parameter \"" (car pars) "\".\n"))
+             (parse-parameters (cdr pars))))))
 (parse-parameters (cdr (command-line))) ;first is this
 ;(parse-parameters (list "load" "test.ism"))
 

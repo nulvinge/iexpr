@@ -1,0 +1,37 @@
+define-macro lam pars
+                 .
+                 bodies
+             ` lambda ,pars
+                      ,@bodies
+
+define-macro def pars
+                 .
+                 bodies
+             ` define ,pars
+                      ,@bodies
+
+;The following lines proves that the above lines work
+;write grp lam a b
+;              + a
+;                b
+;          1
+;          2
+;write grp lam grp a
+;              + a
+;                1
+;          2
+;write grp lam grp
+;              + 1
+;                2
+;
+;def hello
+;    'a
+;write hello
+;def grp hello
+;    'a
+;write grp hello
+;def hello a
+;    begin string->symbol a
+;write hello "a"
+;
+;grp newline
