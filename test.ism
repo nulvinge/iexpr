@@ -40,3 +40,8 @@ write map fac
 group newline
 write fac 5
 group newline
+
+;this should work, and should be the same as
+;(write (list 'a 'b))
+write list 'a
+       'b

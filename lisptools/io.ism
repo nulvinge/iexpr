@@ -1,0 +1,27 @@
+def writer x
+    write x
+    x
+
+def writen x
+    write x
+    group newline
+
+
+(define (read-token)
+  (define (loop)
+    (if (or (null? (peek-char))
+            (char-whitespace? (peek-char))
+            (eof-object? (peek-char)))
+      '()
+      (cans (read-char)
+            (loop))))
+  (list->string (loop)))
+(define (read-whitespace)
+  (define (loop)
+    (if (or (null? (peek-char))
+            (not (char-whitespace? (peek-char)))
+            (eof-object? (peek-char)))
+      '()
+      (cans (read-char)
+            (loop))))
+  (list->string (loop)))

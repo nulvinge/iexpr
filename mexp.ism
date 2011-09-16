@@ -1,0 +1,162 @@
+define-macro cans car
+                  cdr
+    let grp car-sym grp gensym
+        ` let grp grp , car-sym
+                      , car
+              cons , car-sym
+                   , cdr
+
+define mread .
+             port
+  define peek
+         '()
+  define indent
+         -1
+  define eof
+         integer->char 1
+  define grp get
+         let grp ret peek
+             if or eof-object? peek-char port
+                   equal? peek-char port
+                          #!eof
+                set! peek
+                     eof
+                set! peek
+                     read-char port
+             ret
+  define grp tokenize ;requires that we end with whitespace
+    define whitespace? c
+           or equal? c
+                     #\t
+              equal? c
+                     #\space
+              equal? c
+                     #\newline
+    define alphanum? c
+           or char-alphabetic? c
+              char-numeric? c
+    define read-while pred
+           if pred peek
+              cans grp get
+                   read-while pred
+              ' grp
+    define grp read-ident
+           read-while alphanum?
+    define grp skip-comment
+           grp get
+           cond grp equal? peek
+                           #\/
+                    read-while lambda grp c
+                                 not equal? c
+                                            #\newline
+                    grp skip-whitespace
+                grp equal? peek
+                           #\*
+                    grp skip-c-comment
+                else
+                    'error ;unget #\/
+    define grp skip-c-comment
+           read-while lambda grp c
+                        not equal? c
+                                   #\*
+           grp get
+           if not equal? peek
+                         #\/
+              grp skip-c-comment
+              begin grp get
+                    grp skip-whitespace
+    define grp skip-whitespace
+           if equal? peek
+                     #\/
+              grp skip-comment
+              if char-whitespace? peek
+                 begin grp get
+                       grp skip-whitespace
+    define grp read-token
+      cond grp number? peek
+               cons 'number
+                    grp read-number
+           grp char-alphabetic? peek
+               cons 'ident
+                    grp read-ident
+           grp equal? eof
+                      peek
+               cons 'eof
+                    cons grp get
+                         '()
+           grp else
+               cons 'unknown
+                    cons grp get
+                         '()
+    define format-token token
+        cons car token
+             list->string cdr token
+    grp skip-whitespace
+    format-token grp read-token
+
+  define peekt
+         '()
+  define grp gett
+         let grp ret peekt
+             set! peekt
+                  grp tokenize
+             ret
+  define grp token
+      cond grp equal? car peekt
+                      'number
+               cdr grp gett
+           grp equal? car peekt
+                      'ident
+               cdr grp gett
+  define grp unop
+    grp token
+  define binops
+    ' grp ("*" "/" "%")
+          ("+" "-")
+
+  define binop first
+               binops
+               check
+      if and equal? car peekt
+                   'unknown
+             not null? binops
+         if not equal? member cdr peekt
+                              car binops
+                       #f
+            let grp op cdr grp gett
+                binop list op
+                           first
+                           grp unop
+                      binops
+                      #f
+            if check
+               binop first
+                     cdr binops
+                     #f
+               binop binop first
+                           cdr binops
+                           #f
+                     binops
+                     #t
+
+         first
+  define grp expression
+    let grp first grp unop
+        binop first
+              binops
+              #f
+
+  if null? port
+     set! port
+          current-input-port
+     set! port
+          car port
+
+
+  grp get ;init
+  grp gett
+
+  grp expression
+
+write mread open-input-string "a+b // hello \n * c /* tja */ % d\n"
+grp newline

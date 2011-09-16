@@ -1,0 +1,49 @@
+Indented expressions.
+
+iexp, iexpr.
+
+sexp means S-expressions.
+
+All code is made up of trees, that is mathematical trees, which is the same as
+hiercial structures. The next question must then be, how do one represent these
+trees in the most efficient way. Mathematics have had one sollution to this,
+which lisp coders have adopted and made into their sexp, which are simply parens
+enclosing the elements of a list. This type of list is very simple to parse, and
+generate. Consider the following code:
+(trunk (branch (leaf leaf) (branch (leaf leaf))))
+
+Because this isn't very easy to read, I'll format it a little for you:
+(trunk (branch (leaf
+                leaf)
+       (branch (leaf
+                leaf))))
+
+This isn't the standard lisp formating scheme, but it is very easy to read, and
+see the tree structure.
+
+Notice all the end parens, many people think those look very ugly, but I and all
+lisp coders don't even realize they are there. They become a natural part of the
+code, and I don't have to read them to understand the code. What if I removed
+them then?
+
+trunk branch leaf
+             leaf
+      branch leaf
+             leaf
+
+I can still understand the structure of this, and so can most people (even
+non-lispers). This is what I call i-expressions, or iexp.
+
+If I give you the task to draw a heirarcy many of you would draw something like
+this:
+
+          _______
+      ___/ trunk \__
+ ____/branch | branch\____
+/leaf | leaf | leaf | leaf\
+---------------------------
+
+One can prove this to oneself by look at the following url:
+http://images.google.com/images?q=hierarchy
+
+

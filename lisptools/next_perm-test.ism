@@ -1,0 +1,7 @@
+iload "../lisptools/loader.ism"
+
+def loop l
+    writen l
+    if l
+      loop next_perm l
+loop '(1 2 3 4 5)

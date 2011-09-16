@@ -139,7 +139,7 @@
         (begin (get)
                (read-comment))))
     (define (read-whitespace)
-      (if (equal? peek #\;) ; ; IS preceded by whitespace
+      (if (equal? peek #\;) ; ';' IS preceded by whitespace
         (read-comment)
         (if (and (not (null? peek))
                  (char-whitespace? peek))
@@ -221,18 +221,18 @@
         (if (or (equal? "group" first)
                 (equal? "grp" first))
           (if (< i (car peekt))
-            (body (car peekt))
+            (body i)
             "()") ;if group is alone
           (if (< i (car peekt)) ;we have childs
             (cans first
-                  (body (car peekt)))
+                  (body i))
             first))))
     (define (body i)
-      (if (<= i (car peekt))
-        (cans (head i)
+      (if (< i (car peekt))
+        (cans (head (car peekt))
               (body i))
         '()))
-    (body 0))
+    (body -1))
 
   (define (to-string l)
     (define (loop l)
@@ -269,7 +269,7 @@
 
 (define (iload filename)
   (iexecute (open-input-file filename))
-  (write filename) (newline))
+  filename)
 
 (define (iinteractive)
   (define (read-line)

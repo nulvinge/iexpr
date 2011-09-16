@@ -1,0 +1,6 @@
+iload "/home/idk/prj/lisptools/shorts.ism"
+iload "/home/idk/prj/lisptools/macros.ism"
+iload "/home/idk/prj/lisptools/io.ism"
+iload "/home/idk/prj/lisptools/math.ism"
+iload "/home/idk/prj/lisptools/lists.ism"
+load  "/home/idk/prj/lisptools/srfi1.scm"

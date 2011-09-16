@@ -1,0 +1,13 @@
+iload "loader.ism"
+
+letv grp
+     'a
+
+letv grp a b
+           values 1
+                  2
+  writer a
+  writer b
+
+grp newline
+

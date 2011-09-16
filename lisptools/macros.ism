@@ -1,0 +1,51 @@
+
+
+;cons with forced evaluation order
+(define-macro (cans car cdr)
+   (let ((car-sym (gensym)))
+     `(let ((,car-sym ,car))
+        (cons ,car-sym ,cdr))))
+
+;simple gensym binding macro
+;(define-macro (with-gensyms syms &body body)
+;  `(let ,(mapcar (lambda (s)
+;                   (,s (gensym)))
+;                 syms)
+;     ,@body))
+
+;(define-macro (our-let binds . body)
+;    `((lambda ,(mapcar (lambda (x)
+;                         (if (consp x)
+;                           (car x)
+;                           x))
+;                       binds)
+;          ,@body)
+;       ,@(mapcar (lambda (x)
+;                    (if (consp x) (cadr x) nil))
+;                 binds)))
+;
+
+;(define-syntax mtrace
+;  (syntax-rules '()
+;    ((mtrace x)
+;     (begin
+;      (display "Trace: ") (write 'x) (newline)
+;      x))))
+
+define-macro letv bind
+                  .
+                  body
+    def grp splitl
+        split lam grp l
+                  null? cdr l
+              car bind
+    if null? bind
+      `(begin ,@body)
+      call-with-values splitl
+        lam vars last
+            ` call-with-values lam grp
+                                   ,@ last
+                lam , vars
+                    letv , cdr bind
+                         ,@ body
+

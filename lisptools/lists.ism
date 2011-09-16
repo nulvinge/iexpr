@@ -1,0 +1,304 @@
+def identity x
+    x
+
+def mapn func
+         len
+    def loop n
+        if = len
+             n
+           '()
+           cons func n
+                loop ++ n
+    loop 0
+
+def map-combine combiner
+                func
+                lst
+    def loop lst
+        if null? lst
+           '()
+           combiner func car lst
+                    loop cdr lst
+    loop lst
+
+def map-append func
+               lst
+    map-combine append
+                func
+                lst
+
+;flattens a list
+def flatten l
+    if null? l
+      '()
+      append car l
+             flatten cdr l
+
+;generates n items generated with
+;generator and combined together
+;with combiner
+def generate combiner
+             generator
+             n
+    if zero? n
+      '()
+      combiner group generate
+               generate combiner
+                        generator
+                        -- n
+
+;finds item in l where pred is true
+def find pred
+         l
+    if null? l
+       #f
+       if pred car l
+          car l
+          find pred
+               cdr l
+
+;returns the head of a list
+(define (list-head l k)
+  (if (zero? k)
+    '()
+    (cons (car l)
+          (list-head (cdr l) (- k 1)))))
+
+(define (index object l)
+  (define (index-loop l i)
+    (if (null? l)
+      #f
+      (if (eq? (car l) object)
+        i
+        (index-loop (cdr l) (+ i 1)))))
+  (index-loop l 0))
+
+(define (find-max l)
+  (if (null? l)
+    -inf.0
+    (max (car l)
+         (find-max (cdr l)))))
+(define (find-min l)
+  (if (null? l)
+    +inf.0
+    (min (car l)
+         (find-min (cdr l)))))
+
+;returns the index of the highest value
+def find-high-index lst
+    def high
+        0
+    def hi
+        '()
+    def loop i
+             l
+        if not null? l
+          begin
+            if > car l
+                 high
+              begin
+                set! high
+                     car l
+                set! hi
+                     i
+          loop ++ i
+               cdr l
+    loop 0
+         lst
+    hi
+
+def vec_swap! vec
+              i1
+              i2
+    def tmp
+        vector-ref vec
+                   i1
+    vector-set! vec
+                i1
+                vector-ref vec
+                           i2
+    vector-set! vec
+                i2
+                tmp
+    vec
+
+
+;shuffles a list randomly
+;taken from C++ STL
+def random_shuffle! vec
+    def func i
+        vec_swap! vec
+                  i
+                  random-integer ++ i
+    mapn func
+         vector-length vec
+    vec
+
+def random_sequence n
+    random_shuffle! list->vector range n
+
+;makes the rows of a list
+;the coloums and virce versa
+def turn l
+    def row r
+        map lam group i
+                list-ref i
+                         r
+            l
+    mapn row
+         length car l
+
+;generates a list with all number from from to to
+def range from
+          .
+          to
+    def real-range from
+                   to
+        if > 0
+             - to
+               from
+           "error, negative range"
+           mapn lam group x
+                    + from
+                      x
+                - to
+                  from
+    if null? to
+      real-range 0
+                 from
+      real-range from
+                 car to
+
+
+;connects the tail of a list to its head
+def make-circular lst
+    def loop pos
+        if null? cdr pos
+          set-cdr! pos
+                   lst
+          loop cdr pos
+    loop lst
+    lst
+
+;returns a copy of lst without
+;the ones where pred is true
+def remove-if pred
+              lst
+    if null? lst
+      '()
+      if pred car lst
+        remove-if pred
+                  cdr lst
+        cons car lst
+             remove-if pred
+                       cdr lst
+
+;removes return a copy of lst without i
+def remove i
+           lst
+    remove-if lam grp i2
+                  eq? i
+                      i2
+              lst
+
+def quicksort comparator
+              l
+    if null? l
+      '()
+      (append
+        (quicksort comparator (remove-if (lambda (i) (comparator i (car l))) (cdr l)))
+        (list (car l))
+        (quicksort comparator (remove-if (lambda (i) (not (comparator i (car l)))) (cdr l))))
+
+;returns a list of all permutations
+def permutations lst
+    if null? lst
+      list grp list
+      map-append lam grp e
+                   map lam grp p
+                           cons e
+                                p
+                       permutations remove e
+                                           lst
+          lst
+
+
+;returns all subsets of lst
+def powerset lst
+    if null? lst
+      list grp list
+      let grp ps powerset cdr lst
+        append ps
+               map lam grp x
+                       cons car lst
+                            x
+                   ps
+
+;reimplementation of the C++ standard
+;library next_permutation
+;This is O(5n)
+def next_perm lst
+    def rev
+        reverse lst
+    def first ii
+        if null? cdr ii ;at end
+          rev
+          if > car ii
+               cadr ii
+            second cdr ii
+                   rev
+            first cdr ii
+    def second i
+               j
+        if not > car i
+                 car j
+          last i
+               j
+          second i
+                 cdr j
+    def last i
+             j
+        def tmp
+            car i
+        def ii
+            cdr i
+        set-car! i
+                 car j
+        set-car! j
+                 tmp
+        set! rev
+             reverse! rev
+        reverse-tail rev
+                     cdr i
+    def reverse-tail lst
+                     tail
+        if eq? lst
+               tail
+          reverse lst
+          cons car lst
+               reverse-tail cdr lst
+                            tail
+    if null? lst
+      '(())
+      if null? cdr lst
+        list car lst
+        first rev
+
+;splits lst where pred is first true
+;this is O(n) (super fast ;-)
+;Note: this func is used by letv, so
+;ironically we can't use it here...
+def split pred
+          lst
+   if or pred lst
+         null? lst
+     values '()
+            lst
+     call-with-values lam grp
+                          split pred
+                                cdr lst
+       lam first last
+           values cons car lst
+                       first
+                  last
+
